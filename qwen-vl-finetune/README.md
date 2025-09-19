@@ -13,6 +13,8 @@ The `qwenvl` directory contains the following components:
 - `trainer.py`: Main trainer updated from Huggingface Trainer
 - `train_qwen.py`: Main file for training
 - `argument.py`: Dataclasses for model, data and training arguments
+- `train_dual_stream.py`: Training pipeline for the dual-stream vision encoder and VE-Gate modules
+- `test_dual_stream.py`: Utility script to benchmark baseline and dual-stream checkpoints on VQA-style datasets
 
 ### `data/`
 - `__init__.py`: Contains datasets configs
@@ -36,6 +38,38 @@ You could use follow version of packages:
 - `triton==3.0.0`
 - `accelerate==1.4.0`
 - `torchcodec==0.2`
+
+## Dual-stream Vision Encoder & VE-Gate
+
+To mitigate the loss of fine-grained geometry and to regulate textual priors, the repository now ships with:
+
+- A **dual-stream vision encoder** that runs the native Qwen2.5-VL vision tower in parallel with a high-fidelity DINOv3 backbone.
+- A **visual evidence gate (VE-Gate)** that dynamically scales visual embeddings before they are injected into the language model.
+
+### Training the dual-stream model
+
+```
+python -m qwenvl.train.train_dual_stream \
+  --model_name_or_path /data/qt/modelscope/models/Qwen/Qwen2___5-VL-7B-Instruct \
+  --output_dir /path/to/output \
+  --dataset_use your_dataset_config \
+  --tune_mm_mlp True --tune_mm_vision True \
+  --dinov3_modelscope_model_id /data/qt/modelscope/models/facebook/dinov3-vith16plus-pretrain-lvd1689m
+```
+
+All dual-stream specific hyper-parameters can be configured via the new `DualStreamArguments` dataclass (see `qwenvl/train/argument.py`).
+Set `--dinov3_modelscope_model_id` to either the ModelScope identifier (`facebook/dinov3-vith16plus-pretrain-lvd1689m`) or a downloaded directory to reuse the same weights and loading behaviour as the official ModelScope examples. When this flag is omitted the loader falls back to `torch.hub.load` with [`facebookresearch/dinov3`](https://github.com/facebookresearch/dinov3); the `--dinov3_repo_or_dir` and `--dinov3_checkpoint_path` flags remain available for offline Torch Hub usage.
+
+### Evaluating baseline vs dual-stream checkpoints
+
+```
+python -m qwenvl.train.test_dual_stream \
+  --model_name_or_path /path/to/checkpoint \
+  --data_file /path/to/annotations.jsonl \
+  --output_file ./predictions.jsonl
+```
+
+Add the `--baseline` flag to run the original Qwen2.5-VL model for comparison. The script reports accuracy and optionally dumps per-sample predictions together with VE-Gate statistics.
 
 ## Custom Dataset Configuration
 
