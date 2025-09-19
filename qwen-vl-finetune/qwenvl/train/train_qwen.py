@@ -37,10 +37,12 @@ from transformers import (
 )
 from qwenvl.data.data_qwen import make_supervised_data_module
 from qwenvl.data.data_qwen_packed import make_supervised_data_module_packed
+from qwenvl.models.dual_stream_config import DualStreamConfig
 from qwenvl.train.argument import (
     ModelArguments,
     DataArguments,
     TrainingArguments,
+    DualStreamArguments,
 )
 from transformers import AutoTokenizer, AutoProcessor, Qwen2VLImageProcessor, Trainer
 
@@ -96,9 +98,19 @@ def train(attn_implementation="flash_attention_2"):
     global local_rank
 
     parser = transformers.HfArgumentParser(
-        (ModelArguments, DataArguments, TrainingArguments)
+        (ModelArguments, DataArguments, TrainingArguments, DualStreamArguments)
     )
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    (
+        model_args,
+        data_args,
+        training_args,
+        dual_stream_args,
+    ) = parser.parse_args_into_dataclasses()
+
+    dual_stream_config = DualStreamConfig(
+        freeze_high_fidelity_stream=dual_stream_args.freeze_high_fidelity_stream
+    )
+    model_args.dual_stream_config = dual_stream_config
 
     local_rank = training_args.local_rank
     os.makedirs(training_args.output_dir, exist_ok=True)

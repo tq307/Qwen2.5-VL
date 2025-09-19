@@ -114,6 +114,8 @@ Currently, `qwen-vl-utils` supports three video decoding backends: `torchvision`
 
 - To use `torchcodec` as the backend for video decoding, follow the installation instructions provided in the official [torchcodec repository](https://github.com/pytorch/torchcodec/tree/main?tab=readme-ov-file#installing-torchcodec) and install it manually. Note that `torchcodec` depends on FFmpeg for decoding functionality.
 
+- For the dual-stream high-fidelity encoder, `DualStreamConfig` now exposes a `dinov3_keep_aspect_ratio` flag. When set to `True`, the resize step preserves the original aspect ratio by scaling the longer side to `dinov3_image_size` and adjusting the shorter side proportionally with anti-aliasing enabled. Enable this option—or provide higher resolution inputs—when you need to maximise small-detail preservation (for example, microscopic text or intricate diagrams).
+
 ## Cookbooks
 
 We are preparing [cookbooks](https://github.com/QwenLM/Qwen2.5-VL/tree/main/cookbooks) for many capabilities, including recognition, localization, document parsing, video understanding, key information extraction, and more. Welcome to learn more!
