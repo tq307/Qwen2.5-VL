@@ -25,6 +25,20 @@ class DataArguments:
 
 
 @dataclass
+class DualStreamArguments:
+    freeze_high_fidelity_stream: bool = field(
+        default=False,
+        metadata={
+            "help": (
+                "Whether to freeze the high-fidelity (DINO) stream when using the dual-stream "
+                "vision encoder. Defaults to False so the DINO branch is unfrozen and can adapt "
+                "to industrial scenarios. Set to true to keep the branch frozen."
+            )
+        },
+    )
+
+
+@dataclass
 class TrainingArguments(transformers.TrainingArguments):
     cache_dir: Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")

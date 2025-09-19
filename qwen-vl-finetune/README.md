@@ -309,3 +309,9 @@ The script accepts arguments in three categories:
    - Training with Qwen2.5-VL-32B model, you should have 8 80G GPU refering to `scripts/sft_32b.sh`
    - `"_attn_implementation": "flash_attention_2",` could be add in the config.json of the model to use flash attention.
 
+### Dual-Stream Training
+
+当使用双流视觉编码器时，CLI 现在默认会解冻高保真（DINO）分支，以便模型在工业场景下自动完成领域适配。如果希望继续保持该分支冻结，可显式传入 `--dual_stream_freeze_high_fidelity_stream true`。
+
+When training with the dual-stream vision encoder, the CLI now leaves the high-fidelity (DINO) stream unfrozen so it can adapt to domain-specific data out of the box. Pass `--dual_stream_freeze_high_fidelity_stream true` if you prefer to keep the DINO branch frozen.
+
